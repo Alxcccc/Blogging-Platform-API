@@ -150,3 +150,30 @@ class DataBase():
                 cursor.close()
         else:
             return False
+
+    def get_post_term(self, term: str):
+        cursor = self.conexion.cursor()
+        sql = f"SELECT * FROM posts WHERE title LIKE '%{term}%' OR content LIKE '%{term}%' OR category LIKE '%{term}%' LIMIT 100"
+        try:
+            cursor.execute(sql)
+            self.conexion.commit()
+            registers = cursor.fetchall()
+            posts = []
+            for register in registers:
+                list_format = eval(register[4])
+                post = Post(
+                    id=register[0],         
+                    title=register[1],
+                    content=register[2],     
+                    category=register[3],
+                    tags=list_format,        
+                    createdAt=str(register[5]),   
+                    updateAt=str(register[6])     
+                )
+                posts.append(post.dict())
+            return posts
+        except Exception as e:
+            print("Error in get all post: ", e)
+            self.conexion.rollback()
+        finally:
+            cursor.close()

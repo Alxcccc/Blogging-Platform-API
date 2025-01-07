@@ -75,7 +75,16 @@ async def get_id_post(id: int) -> Post:
 
 @router.get("/post/term/{term}", response_model=list[Post])
 async def get_term_post(term: str):
-    return {"message": f"Get post for {term}"}
+    try:
+        db = DataBase()
+        result = db.get_post_term(term)
+        db.close_conn()
+        if result:
+            return result
+        else:
+            raise HTTPException(status_code=400, detail="Error get all posts with term")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 
