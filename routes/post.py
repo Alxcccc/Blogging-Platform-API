@@ -41,11 +41,31 @@ async def update_post(id: int, post: UpdatePost):
 
 @router.delete("/post/{id}")
 async def delete_post(id: int):
-    return {"message": "Delete post"}
+    result = None
+    try:
+        db = DataBase()
+        result = db.del_post(id)
+        db.close_conn()
+        if result:
+            return {"status": True, "message": f"The post {id} was deleted successfully.", "data": None}
+        else:
+            raise HTTPException(status_code=400, detail="Error delete post: the postID not exits")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/post/{id}")
 async def get_id_post(id: int):
-    return {"message": "Get post for id"}
+    result = None
+    try:
+        db = DataBase()
+        result = db.get_post(id)
+        db.close_conn()
+        if result:
+            return result
+        else:
+            raise HTTPException(status_code=400, detail="Error get post")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/post/term/{term}")
 async def get_term_post(term: str):

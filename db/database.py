@@ -1,6 +1,5 @@
 import pymysql
 from models.post import Post
-import ast
 
 class DataBase():
     def __init__(self):
@@ -47,25 +46,67 @@ class DataBase():
         try:
             cursor.execute(sql)
             self.conexion.commit()
-            records = cursor.fetchall()
+            registers = cursor.fetchall()
             posts = []
-            for record in records:
+            for register in registers:
+                list_format = eval(register[4])
                 post = Post(
-                    id=record[0],         
-                    title=record[1],       
-                    content=record[2],     
-                    category=record[3],    
-                    tags=record[4],        
-                    createdAt=str(record[5]),   
-                    updateAt=str(record[6])     
+                    id=register[0],         
+                    title=register[1],
+                    content=register[2],     
+                    category=register[3],
+                    tags=list_format,        
+                    createdAt=str(register[5]),   
+                    updateAt=str(register[6])     
                 )
-                posts.append(post.dict())  # Convertir a dict y agregar a la lista
-            
-            return posts  # Retornar la lista de diccionarios
+                posts.append(post.dict())
+            return posts
         except Exception as e:
             print("Error in get all post: ", e)
             self.conexion.rollback()
         finally:
             cursor.close()
-            
     
+    def get_post(self, id):
+        cursor = self.conexion.cursor()
+        sql = "SELECT * FROM posts WHERE postID =%s"
+        val = id
+        try:
+            cursor.execute(sql, val)
+            self.conexion.commit()
+            register = cursor.fetchone()
+            list_format = eval(register[4])
+            post = Post(
+                id=register[0],         
+                title=register[1],
+                content=register[2],     
+                category=register[3],
+                tags=list_format,        
+                createdAt=str(register[5]),   
+                updateAt=str(register[6])     
+            )
+            return post
+        except Exception as e:
+            print("Error in get the post: ", e)
+            self.conexion.rollback()
+        finally:
+            cursor.close()
+    
+    def del_post(self, id):
+        cursor = self.conexion.cursor()
+        sql = "DELETE FROM `posts` WHERE `postID`=%s"
+        val = id
+        try:
+            cursor.execute(sql, val)
+            self.conexion.commit()
+            affected_rows = cursor.rowcount
+            if affected_rows > 0:
+                return True
+            else:
+                return False
+            
+        except Exception as e:
+            print("Error in delete the post: ", e)
+            self.conexion.rollback()
+        finally:
+            cursor.close()
