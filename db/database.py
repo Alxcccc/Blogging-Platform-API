@@ -51,13 +51,13 @@ class DataBase():
             posts = []
             for record in records:
                 post = Post(
-                    id=record[0],          # Asumiendo que el ID es el primer campo
-                    title=record[1],       # Título es el segundo campo
-                    content=record[2],     # Contenido es el tercer campo
-                    category=record[3],    # Categoría es el cuarto campo
-                    tags=record[4],        # Etiquetas es el quinto campo
-                    createdAt=str(record[5]),   # Fecha de creación es el sexto campo
-                    updateAt=str(record[6])     # Fecha de actualización es el séptimo campo
+                    id=record[0],         
+                    title=record[1],       
+                    content=record[2],     
+                    category=record[3],    
+                    tags=record[4],        
+                    createdAt=str(record[5]),   
+                    updateAt=str(record[6])     
                 )
                 posts.append(post.dict())  # Convertir a dict y agregar a la lista
             
