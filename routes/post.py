@@ -5,6 +5,21 @@ from db.database import DataBase
 
 router = APIRouter()
 
+@router.post("/post", response_model=Post)
+async def create_post(new_post: Post) -> Post:
+    try:
+        db = DataBase()
+        result = db.add_post(new_post)
+        if result:
+            new_post.id = result
+            return new_post
+        else:
+            raise HTTPException(status_code=400)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error in create post: {e}")
+    finally:
+        db.close_conn()
+        
 @router.get("/post", response_model=list[Post])
 async def get_all_post() -> list:
     try:
@@ -14,52 +29,10 @@ async def get_all_post() -> list:
         if result:
             return result
         else:
-            raise HTTPException(status_code=400, detail="Error get all posts")
+            raise HTTPException(status_code=400)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/post", response_model=Post)
-async def create_post(new_post: Post) -> Post:
-    try:
-        db = DataBase()
-        result = db.add_post(new_post)
-        db.close_conn()
-        if result:
-            new_post.id = result
-            return new_post
-        else:
-            raise HTTPException(status_code=400, detail="Error in create post")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.post("/post/{id}", response_model=Post)
-async def update_post(id: int, new_post: UpdatePost):
-    try:
-        db = DataBase()
-        result_update = db.upd_post(id, new_post)
-        db.close_conn()
-        if result_update:
-            return result_update
-        else:
-            raise HTTPException(status_code=400, detail="Error update post")
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.delete("/post/{id}", response_model=dict)
-async def delete_post(id: int) -> dict:
-    try:
-        db = DataBase()
-        result = db.del_post(id)
-        db.close_conn()
-        if result:
-            return {"status": True, "message": f"The post {id} was deleted successfully.", "data": None}
-        else:
-            raise HTTPException(status_code=400, detail="Error delete post: the postID not exits")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
+        raise HTTPException(status_code=500, detail=f"Error in get posts: {e}")
+    
 @router.get("/post/{id}", response_model=Post)
 async def get_id_post(id: int) -> Post:
     try:
@@ -69,9 +42,9 @@ async def get_id_post(id: int) -> Post:
         if result:
             return result
         else:
-            raise HTTPException(status_code=400, detail="Error get post")
+            raise HTTPException(status_code=400)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Error in get post: {e}")
 
 @router.get("/post/term/{term}", response_model=list[Post])
 async def get_term_post(term: str):
@@ -82,9 +55,38 @@ async def get_term_post(term: str):
         if result:
             return result
         else:
-            raise HTTPException(status_code=400, detail="Error get all posts with term")
+            raise HTTPException(status_code=400)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Error in get posts: {e}")
+
+@router.post("/post/{id}", response_model=Post)
+async def update_post(id: int, new_post: UpdatePost):
+    try:
+        db = DataBase()
+        result_update = db.upd_post(id, new_post)
+        db.close_conn()
+        if result_update:
+            return result_update
+        else:
+            raise HTTPException(status_code=400)
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error in update post: {e}")
+
+@router.delete("/post/{id}", response_model=dict)
+async def delete_post(id: int) -> dict:
+    try:
+        db = DataBase()
+        result = db.del_post(id)
+        db.close_conn()
+        if result:
+            return {"status": True, "message": f"The post {id} was deleted successfully.", "data": None}
+        else:
+            raise HTTPException(status_code=404, detail=f"Not Found the id: {id}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error in delete post: {e}")
+
+
 
 
 

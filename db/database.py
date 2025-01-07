@@ -25,21 +25,18 @@ class DataBase():
             return
     
     def add_post(self, post: Post):
-        last_id = None
         cursor = self.conexion.cursor()
         sql = "INSERT INTO posts (title, content, category, tags, createdAt, updateAt) VALUES (%s, %s, %s, %s, %s, %s)"
         val = (post.title, post.content, post.category, str(post.tags), post.createdAt, post.updateAt)
         try:
             cursor.execute(sql, val)
             self.conexion.commit()
-            print("Post add succesfully")
-            last_id = cursor.lastrowid
+            return cursor.lastrowid
         except Exception as e:
-            print("Error in add the post: ", e)
             self.conexion.rollback()
+            raise e
         finally:
             cursor.close()
-            return last_id
     
     def get_posts(self):
         cursor = self.conexion.cursor()
@@ -63,8 +60,8 @@ class DataBase():
                 posts.append(post.dict())
             return posts
         except Exception as e:
-            print("Error in get all post: ", e)
             self.conexion.rollback()
+            raise e
         finally:
             cursor.close()
     
@@ -88,30 +85,39 @@ class DataBase():
             )
             return post
         except Exception as e:
-            print("Error in get the post: ", e)
             self.conexion.rollback()
+            raise e
         finally:
             cursor.close()
-    
-    def del_post(self, id: int):
+        
+    def get_post_term(self, term: str):
         cursor = self.conexion.cursor()
-        sql = "DELETE FROM `posts` WHERE `postID`=%s"
-        val = id
+        sql = f"SELECT * FROM posts WHERE title LIKE %s OR content LIKE %s OR category LIKE %s LIMIT 100"
+        search_term = f'%{term}%'
         try:
-            cursor.execute(sql, val)
+            cursor.execute(sql, (search_term, search_term, search_term))
             self.conexion.commit()
-            affected_rows = cursor.rowcount
-            if affected_rows > 0:
-                return True
-            else:
-                return False
-            
+            registers = cursor.fetchall()
+            posts = []
+            for register in registers:
+                list_format = eval(register[4])
+                post = Post(
+                    id=register[0],         
+                    title=register[1],
+                    content=register[2],     
+                    category=register[3],
+                    tags=list_format,        
+                    createdAt=str(register[5]),   
+                    updateAt=str(register[6])     
+                )
+                posts.append(post.dict())
+            return posts
         except Exception as e:
-            print("Error in delete the post: ", e)
             self.conexion.rollback()
+            raise e
         finally:
             cursor.close()
-    
+            
     def upd_post(self, id: int, post: UpdatePost):
         cursor = self.conexion.cursor()
         cursor.execute("SELECT title, content, category, tags FROM posts WHERE postID = %s", (id,))
@@ -134,7 +140,7 @@ class DataBase():
                 updates.append("tags = %s")
                 values.append(post.tags)
             if not updates:
-                return False
+                return None
             sql = f"UPDATE posts SET updateAt = '{post.updateAt}', {', '.join(updates)} WHERE postID = %s"
             values.append(id)
             try:
@@ -143,37 +149,29 @@ class DataBase():
                     result = self.get_post(id)
                     return result
             except Exception as e:
-                    print("Error in updating the post: ", e)
                     self.conexion.rollback()
-                    return False
+                    raise e
             finally:
                 cursor.close()
         else:
-            return False
-
-    def get_post_term(self, term: str):
+            return None
+    
+    def del_post(self, id: int):
         cursor = self.conexion.cursor()
-        sql = f"SELECT * FROM posts WHERE title LIKE '%{term}%' OR content LIKE '%{term}%' OR category LIKE '%{term}%' LIMIT 100"
+        sql = "DELETE FROM `posts` WHERE `postID`=%s"
+        val = id
         try:
-            cursor.execute(sql)
+            cursor.execute(sql, val)
             self.conexion.commit()
-            registers = cursor.fetchall()
-            posts = []
-            for register in registers:
-                list_format = eval(register[4])
-                post = Post(
-                    id=register[0],         
-                    title=register[1],
-                    content=register[2],     
-                    category=register[3],
-                    tags=list_format,        
-                    createdAt=str(register[5]),   
-                    updateAt=str(register[6])     
-                )
-                posts.append(post.dict())
-            return posts
+            affected_rows = cursor.rowcount
+            if affected_rows > 0:
+                return True
+            else:
+                return None
+            
         except Exception as e:
-            print("Error in get all post: ", e)
             self.conexion.rollback()
+            raise e
         finally:
             cursor.close()
+    
