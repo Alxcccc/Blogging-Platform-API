@@ -1,12 +1,10 @@
 from pydantic import BaseModel
 from typing import Optional
+from datetime import datetime
 
 class UpdatePost(BaseModel):
-    id: Optional[int] = None
     title: Optional[str] = None
     content: Optional[str] = None
     category: Optional[str] = None
-    tags:  Optional[list] = None
-    createdAt: Optional[str] = None
-    updateAt: str
-    
+    tags:  Optional[list[str]] = None
+    updateAt: Optional[str] = datetime.now()

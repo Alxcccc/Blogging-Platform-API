@@ -1,5 +1,6 @@
 import pymysql
 from models.post import Post
+from models.updatepost import UpdatePost
 
 class DataBase():
     def __init__(self):
@@ -67,7 +68,7 @@ class DataBase():
         finally:
             cursor.close()
     
-    def get_post(self, id):
+    def get_post(self, id: int):
         cursor = self.conexion.cursor()
         sql = "SELECT * FROM posts WHERE postID =%s"
         val = id
@@ -92,7 +93,7 @@ class DataBase():
         finally:
             cursor.close()
     
-    def del_post(self, id):
+    def del_post(self, id: int):
         cursor = self.conexion.cursor()
         sql = "DELETE FROM `posts` WHERE `postID`=%s"
         val = id
@@ -110,3 +111,42 @@ class DataBase():
             self.conexion.rollback()
         finally:
             cursor.close()
+    
+    def upd_post(self, id: int, post: UpdatePost):
+        cursor = self.conexion.cursor()
+        cursor.execute("SELECT title, content, category, tags FROM posts WHERE postID = %s", (id,))
+        current_record = cursor.fetchone()
+        
+        if current_record:
+            current_title, current_content, current_category, current_tags = current_record
+            updates = []
+            values = []
+            if post.title is not None and post.title != current_title:
+                updates.append("title = %s")
+                values.append(post.title)
+            if post.content is not None and post.content != current_content:
+                updates.append("content = %s")
+                values.append(post.content)
+            if post.category is not None and post.category != current_category:
+                updates.append("category = %s")
+                values.append(post.category)
+            if post.tags is not None and post.tags != current_tags:
+                updates.append("tags = %s")
+                values.append(post.tags)
+            if not updates:
+                return False
+            sql = f"UPDATE posts SET updateAt = '{post.updateAt}', {', '.join(updates)} WHERE postID = %s"
+            values.append(id)
+            try:
+                    cursor.execute(sql, values)
+                    self.conexion.commit()
+                    result = self.get_post(id)
+                    return result
+            except Exception as e:
+                    print("Error in updating the post: ", e)
+                    self.conexion.rollback()
+                    return False
+            finally:
+                cursor.close()
+        else:
+            return False
