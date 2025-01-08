@@ -1,19 +1,27 @@
+import os
+
 import pymysql
+from dotenv import load_dotenv
 from models.post import Post
 from models.updatepost import UpdatePost
 
 
 class DataBase:
     def __init__(self):
+        load_dotenv()
+        self.db_host = os.getenv("DB_HOST")
+        self.db_user = os.getenv("DB_USER")
+        self.db_password = os.getenv("DB_PASSWORD")
+        self.db_name = os.getenv("DB_NAME")
         self.conexion = self.conn_db()
 
     def conn_db(self):
         try:
             conn = pymysql.connect(
-                host="xxxxxx",
-                user="xxxxxx",
-                password="xxxxxx",
-                database="xxxxxx",
+                host=self.db_host,
+                user=self.db_user,
+                password=self.db_password,
+                database=self.db_name,
             )
             print("Conexión exitosa a la base de datos.")
             return conn
