@@ -1,11 +1,17 @@
+from db.database import DataBase
 from fastapi import APIRouter, HTTPException
 from models.post import Post
 from models.updatepost import UpdatePost
-from db.database import DataBase
 
 router = APIRouter()
 
-@router.post("/post", summary="Create a new post.", response_model=Post, tags=["CRUD Blogging Platform API"])
+
+@router.post(
+    "/post",
+    summary="Create a new post.",
+    response_model=Post,
+    tags=["CRUD Blogging Platform API"],
+)
 async def create_post(new_post: Post) -> Post:
     """
     Create a new post with the provided information.
@@ -36,7 +42,13 @@ async def create_post(new_post: Post) -> Post:
     finally:
         db.close_conn()
 
-@router.get("/post", summary="Retrieve all posts from the database.", response_model=list[Post], tags=["CRUD Blogging Platform API"])
+
+@router.get(
+    "/post",
+    summary="Retrieve all posts from the database.",
+    response_model=list[Post],
+    tags=["CRUD Blogging Platform API"],
+)
 async def get_all_post() -> list:
     """
     Retrieve all posts from the database.
@@ -58,7 +70,13 @@ async def get_all_post() -> list:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error in get posts: {e}")
 
-@router.get("/post/{id}", summary="Retrieve a specific post by its ID.", response_model=Post, tags=["CRUD Blogging Platform API"])
+
+@router.get(
+    "/post/{id}",
+    summary="Retrieve a specific post by its ID.",
+    response_model=Post,
+    tags=["CRUD Blogging Platform API"],
+)
 async def get_id_post(id: int) -> Post:
     """
     Retrieve a specific post by its ID.
@@ -83,7 +101,13 @@ async def get_id_post(id: int) -> Post:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error in get post: {e}")
 
-@router.get("/post/term/{term}", summary="Search for posts that match a specific search term in their title, content, or tags.", response_model=list[Post], tags=["CRUD Blogging Platform API"])
+
+@router.get(
+    "/post/term/{term}",
+    summary="Search for posts that match a specific search term in their title, content, or tags.",
+    response_model=list[Post],
+    tags=["CRUD Blogging Platform API"],
+)
 async def get_term_post(term: str):
     """
     Search for posts that match a specific search term in their title, content, or tags.
@@ -104,11 +128,19 @@ async def get_term_post(term: str):
         if result:
             return result
         else:
-            raise HTTPException(status_code=404, detail="No posts found matching the search term.")
+            raise HTTPException(
+                status_code=404, detail="No posts found matching the search term."
+            )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error in get posts: {e}")
 
-@router.post("/post/{id}", summary="Update an existing post by its ID with new information.", response_model=Post, tags=["CRUD Blogging Platform API"])
+
+@router.post(
+    "/post/{id}",
+    summary="Update an existing post by its ID with new information.",
+    response_model=Post,
+    tags=["CRUD Blogging Platform API"],
+)
 async def update_post(id: int, new_post: UpdatePost):
     """
     Update an existing post by its ID with new information.
@@ -127,16 +159,22 @@ async def update_post(id: int, new_post: UpdatePost):
         db = DataBase()
         result_update = db.upd_post(id, new_post)
         db.close_conn()
-        
+
         if result_update:
             return result_update
         else:
             raise HTTPException(status_code=404, detail=f"Post with ID {id} not found.")
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error in update post: {e}")
 
-@router.delete("/post/{id}", summary="Delete a specific post by its ID.", response_model=dict, tags=["CRUD Blogging Platform API"])
+
+@router.delete(
+    "/post/{id}",
+    summary="Delete a specific post by its ID.",
+    response_model=dict,
+    tags=["CRUD Blogging Platform API"],
+)
 async def delete_post(id: int) -> dict:
     """
     Delete a specific post by its ID.
@@ -154,17 +192,15 @@ async def delete_post(id: int) -> dict:
         db = DataBase()
         result = db.del_post(id)
         db.close_conn()
-        
+
         if result:
-            return {"status": True, "message": f"The post {id} was deleted successfully.", "data": None}
+            return {
+                "status": True,
+                "message": f"The post {id} was deleted successfully.",
+                "data": None,
+            }
         else:
             raise HTTPException(status_code=404, detail=f"Not Found the id: {id}")
-    
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error in delete post: {e}")
-
-
-
-
-
-
