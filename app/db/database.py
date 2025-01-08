@@ -10,10 +10,10 @@ class DataBase:
     def conn_db(self):
         try:
             conn = pymysql.connect(
-                host="localhost",
-                user="root",
-                password="facebookalec7",
-                database="project",
+                host="xxxxxx",
+                user="xxxxxx",
+                password="xxxxxx",
+                database="xxxxxx",
             )
             print("Conexión exitosa a la base de datos.")
             return conn
