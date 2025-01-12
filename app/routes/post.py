@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException
 from models.post import Post
 from models.updatepost import UpdatePost
 
-router = APIRouter()
+router = APIRouter(prefix="/api")
 
 
 @router.post(
